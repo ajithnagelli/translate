@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const schema = new Schema({
     
-    phoneNumber: {type:Number, required:[true, 'Phone Number cannot be empty']},
+    phoneNumber: {type:String, required:[true, 'Phone Number cannot be empty']},
 
     farmerName: {type:String, required:[true, 'Farmer Name cannot be empty']},
 

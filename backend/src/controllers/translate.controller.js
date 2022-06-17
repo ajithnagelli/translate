@@ -26,17 +26,14 @@ exports.translateData = async function (req, res) {
         }
         TranslateModel.findOne({
             phoneNumber: eachRecord.phone_number
-        }).
-        then(translateModelData => {
+        })
+        .then(translateModelData => {
             if(!translateModelData) {
                 TranslateModel.create(recordData)
                 .then(data => {
                     const recordList = [eachRecord.phone_number, eachRecord.farmer_name, eachRecord.village_name, eachRecord.district_name, eachRecord.state_name]
-                    const targets = ['pa', 'te'];
-                    const languageOb = {
-                        'pa': 'Punjabi',
-                        'te': 'Telugu'
-                    }
+                    const targets = configData.supportedLanguageCodes;
+                    const languageOb = configData.supportedLanguageMappings;
                     async.forEachSeries(targets, function (eachTarget, targetCallback) {
                         translateFunction.translate(recordList, eachTarget).then(([res]) => {
                             const translatedData = {
@@ -53,21 +50,41 @@ exports.translateData = async function (req, res) {
                             .then(trData => {
                                 console.log(translatedData)
                                 targetCallback();
+                            })
+                            .catch(createErr => {
+                                return res.status(400).send({ error: createErr });
                             });
+                        })
+                        .catch(translateErr => {
+                            return res.status(400).send({ error: translateErr });
                         });
-                    }, function() {
-                        console.log(recordData);
-                        recordCallback();
+                    }, function(translateError) {
+                        if(translateError) {
+                            return res.status(400).send({ error: translateError});
+                        }
+                        else {
+                            recordCallback();
+                        }
                     });
                 })
-                .catch(err => {
-                    res.json({ error: err });
+                .catch(createError => {
+                    return res.status(400).send({ error: createError });
                 });
             }
             else {
-                res.json({status: 'Data already translated'});
+                return res.status(400).send({status: 'Data already translated'});
             }
+        })
+        .catch(findErr => {
+            return res.status(400).send({ error: findErr });
         });
+    }, function(err) {
+        if(err) {
+            return res.status(400).send({error: err});
+        }
+        else {
+            res.json({status: 'Data translated successfully'});
+        }
     });
 }
 
@@ -93,4 +110,7 @@ exports.getTranslatedData = function(req, res) {
             res.json({err: 'No translated data'});
         }
     })
+    .catch(fetchErr => {
+        return res.status(400).send({ error: fetchErr });
+    });
 }

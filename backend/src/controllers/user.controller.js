@@ -23,12 +23,11 @@ exports.register = function(req, res) {
                     res.json({ status: "User registered successfully" });
                 })
                 .catch(err => {
-                var arr = Object.keys(err['errors'])
-                var errors = []
-                for (i in arr) {
-                    errors.push(err['errors'][arr[i]].message);
-                }
-                console.log(errors)
+                    var arr = Object.keys(err['errors'])
+                    var errors = []
+                    for (i in arr) {
+                        errors.push(err['errors'][arr[i]].message);
+                    }
                     res.json({ error: errors });
                 });
             });
@@ -43,7 +42,6 @@ exports.register = function(req, res) {
         for (i in arr) {
             errors.push(err['errors'][arr[i]].message);
         }
-        console.log(errors)
         res.json({ error: errors });
     });  
 }

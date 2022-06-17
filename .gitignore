@@ -102,3 +102,6 @@ dist
 
 # TernJS port file
 .tern-port
+
+# Required files regarding asssignment (Ex: Key file for Google Translate Api)
+requirements

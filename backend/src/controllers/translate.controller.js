@@ -1,15 +1,17 @@
 const {Translate} = require('@google-cloud/translate').v2;
-credentials = require('../requirements/e-context-352808-4e0fcdf3df45.json');
+// credentials = require('../../requirements/e-context-352808-4e0fcdf3df45.json');
+const configData = require('../../config');
+const credentials = configData.credentials;
 var fs = require('fs').promises;
 var { parse } = require('csv-parse/sync');
 async = require('async');
 const TranslateModel = require('../models/translate.model');
+var mongoose = require('mongoose');
 
 
 exports.translateData = async function (req, res) {
     const translateFunction = new Translate({projectId: credentials.project_id ,credentials: credentials});
-    const text = ['The text to translate, e.g. Hello, world!', 'The text to translate, e.g. Hello, world!'];
-    const fileContent = await fs.readFile('/Users/nvipani/Desktop/translate-1/backend/requirements/Sheet1.csv');
+    const fileContent = await fs.readFile(configData.csvDataFile);
     const records = parse(fileContent, {columns: true});
     async.forEachSeries(records, function (eachRecord, recordCallback) {
         const recordData = {
@@ -67,4 +69,28 @@ exports.translateData = async function (req, res) {
             }
         });
     });
+}
+
+exports.getTranslatedData = function(req, res) {
+    TranslateModel.aggregate([
+        { $match: 
+            {
+                user: mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $group: { _id: "$language",  translatedData: { $push: "$$ROOT" } }
+        },
+        {
+            $project: { translatedData: { phoneNumber: 1, farmerName: 1, village: 1, district: 1, state: 1, language: 1 } }
+        }
+    ])
+    .then(data => {
+        if(data && data.length) {
+            res.json(data);
+        }
+        else {
+            res.json({err: 'No translated data'});
+        }
+    })
 }

@@ -15,8 +15,8 @@ connection.once('open', function(){
     console.log("connected");
 });
 
-const translateRoutes = require('./routes/translate.routes');
-const userRoutes = require('./routes/user.routes');
+const translateRoutes = require('./src/routes/translate.routes');
+const userRoutes = require('./src/routes/user.routes');
 // const pupmroutes = require('./routes/pumpFunctions');
 // const managerroutes = require('./routes/manager');
 

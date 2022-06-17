@@ -10,4 +10,6 @@ const translate = require('../controllers/translate.controller');
 
 router.post('/translateData', auth.auth, translate.translateData);
 
+router.get('/translatedData', auth.auth, translate.getTranslatedData);
+
 module.exports = router;

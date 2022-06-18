@@ -1,0 +1,45 @@
+<div fxLayout="column" fxLayoutAlign="center center">
+    <mat-card class="login-card">
+        <mat-card-title fxLayout="row" fxLayoutAlign="center center">REGISTER</mat-card-title>
+        <mat-card-content fxLayout="column" fxLayoutAlign="center center">
+    
+            <div>
+                <mat-form-field appearance="standard">
+                    <mat-label>Username</mat-label>
+                    <input [(ngModel)]="username" type="text" matInput placeholder="Enter username">
+                </mat-form-field>
+            </div>
+            
+            <div>
+                <mat-form-field appearance="standard">
+                    <mat-label>Email</mat-label>
+                    <input [(ngModel)]="email" type="email" matInput placeholder="Enter email address">
+                </mat-form-field>
+            </div>
+
+            <div>
+                <mat-form-field appearance="standard">
+                    <mat-label>Password</mat-label>
+                    <input [(ngModel)]="password" type="password" matInput placeholder="Enter password">
+                </mat-form-field>
+            </div>
+
+            <div>
+                <mat-form-field appearance="standard">
+                    <mat-label>Re-enter Password</mat-label>
+                    <input [(ngModel)]="reenterPassword" type="password" matInput placeholder="Enter password again">
+                </mat-form-field>
+            </div>
+    
+            <p *ngIf="error" class="error">
+                {{ error }}
+            </p>
+    
+            <div class="button">
+                <button type="submit" mat-raised-button color="primary" (click)="register()" [disabled]="!validCredentials()">Register</button>
+            </div>
+            
+            <p class="signup-text cursor-pointer" (click)="goToLogin()">Already registered? Login</p>
+        </mat-card-content>
+    </mat-card>
+</div>

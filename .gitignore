@@ -105,3 +105,17 @@ dist
 
 # Required files regarding asssignment (Ex: Key file for Google Translate Api)
 requirements
+
+package-lock.json
+
+# IDE - VSCode
+.vscode/*
+.vscode
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# System Files
+.DS_Store
+Thumbs.db

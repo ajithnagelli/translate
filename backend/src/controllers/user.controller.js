@@ -18,9 +18,19 @@ exports.register = function(req, res) {
         if (!user) {
             bcrypt.hash(req.body.hashedPassword, 10, (err, hash) => {
             userData.hashedPassword = hash
+            console.log(req.body, user)
             User.create(userData)
                 .then(user => {
-                    res.json({ status: "User registered successfully" });
+                    const payload = {
+                        _id: user._id,
+                        email: user.email,
+                        username: user.username
+                    }
+                    let token = jwt.sign(payload, process.SECRET_KEY, {
+                        algorithm: 'HS256',
+                        expiresIn: 86400
+                    });
+                    res.send({token: token});
                 })
                 .catch(err => {
                     var arr = Object.keys(err['errors'])
@@ -53,17 +63,17 @@ exports.login = function (req, res) {
     .then(user => {
         if (user) {
             if (bcrypt.compareSync(req.body.hashedPassword, user.hashedPassword)) {
-            // Passwords match
-            const payload = {
-                _id: user._id,
-                email: user.email,
-                username: user.username
-            }
-            let token = jwt.sign(payload, process.SECRET_KEY, {
-                algorithm: 'HS256',
-                expiresIn: 86400
-            });
-            res.send(token);
+                // Passwords match
+                const payload = {
+                    _id: user._id,
+                    email: user.email,
+                    username: user.username
+                }
+                let token = jwt.sign(payload, process.SECRET_KEY, {
+                    algorithm: 'HS256',
+                    expiresIn: 86400
+                });
+                res.json({token: token});
             } else {
                 // Passwords don't match
                 res.json({ error: 'Incorrect Password' });

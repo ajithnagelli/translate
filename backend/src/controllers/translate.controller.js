@@ -48,7 +48,6 @@ exports.translateData = async function (req, res) {
                             }
                             TranslateModel.create(translatedData)
                             .then(trData => {
-                                console.log(translatedData)
                                 targetCallback();
                             })
                             .catch(createErr => {
@@ -99,7 +98,7 @@ exports.getTranslatedData = function(req, res) {
             $group: { _id: "$language",  translatedData: { $push: "$$ROOT" } }
         },
         {
-            $project: { translatedData: { phoneNumber: 1, farmerName: 1, village: 1, district: 1, state: 1, language: 1 } }
+            $project: { translatedData: { phoneNumber: 1, farmerName: 1, village: 1, district: 1, state: 1 } }
         }
     ])
     .then(data => {

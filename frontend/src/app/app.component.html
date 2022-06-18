@@ -1,0 +1,5 @@
+<div *ngIf="isLoggedIn()" class="button logout" fxLayout="column" fxLayoutAlign="end end">
+    <button type="submit" mat-raised-button color="primary" (click)="logout()">Logout</button>
+</div>
+
+<router-outlet></router-outlet>

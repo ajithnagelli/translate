@@ -8,3 +8,6 @@ Steps to run the frontend server
     1. Install angular.
     2. Go to frontend folder and execute 'npm install' to get all the dependencies.
     3. Execute 'npm start' to run the server.
+
+Asssumptions:
+    1. Each user has a different .csv data

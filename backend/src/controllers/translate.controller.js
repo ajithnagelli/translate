@@ -13,6 +13,12 @@ exports.translateData = async function (req, res) {
     const translateFunction = new Translate({projectId: credentials.project_id ,credentials: credentials});
     const fileContent = await fs.readFile(configData.csvDataFile);
     const records = parse(fileContent, {columns: true});
+    TranslateModel.findOne({user: mongoose.Types.ObjectId(req.user._id)})
+    .then(findModelData => {
+        if(findModelData) {
+            return res.status(400).send({status: 'Data already translated'});
+        }
+    });
     async.forEachSeries(records, function (eachRecord, recordCallback) {
         const recordData = {
             phoneNumber: eachRecord.phone_number,
@@ -24,58 +30,45 @@ exports.translateData = async function (req, res) {
             language: 'English',
             user: req.user._id
         }
-        TranslateModel.findOne({
-            phoneNumber: eachRecord.phone_number
-        })
-        .then(translateModelData => {
-            if(!translateModelData) {
-                TranslateModel.create(recordData)
-                .then(data => {
-                    const recordList = [eachRecord.phone_number, eachRecord.farmer_name, eachRecord.village_name, eachRecord.district_name, eachRecord.state_name]
-                    const targets = configData.supportedLanguageCodes;
-                    const languageOb = configData.supportedLanguageMappings;
-                    async.forEachSeries(targets, function (eachTarget, targetCallback) {
-                        translateFunction.translate(recordList, eachTarget).then(([res]) => {
-                            const translatedData = {
-                                phoneNumber: res[0],
-                                farmerName: res[1],
-                                village: res[2],
-                                district: res[3],
-                                state: res[4],
-                                languageCode: eachTarget,
-                                language: languageOb[eachTarget],
-                                user: req.user._id
-                            }
-                            TranslateModel.create(translatedData)
-                            .then(trData => {
-                                targetCallback();
-                            })
-                            .catch(createErr => {
-                                return res.status(400).send({ error: createErr });
-                            });
-                        })
-                        .catch(translateErr => {
-                            return res.status(400).send({ error: translateErr });
-                        });
-                    }, function(translateError) {
-                        if(translateError) {
-                            return res.status(400).send({ error: translateError});
-                        }
-                        else {
-                            recordCallback();
-                        }
+        TranslateModel.create(recordData)
+        .then(data => {
+            const recordList = [eachRecord.phone_number, eachRecord.farmer_name, eachRecord.village_name, eachRecord.district_name, eachRecord.state_name]
+            const targets = configData.supportedLanguageCodes;
+            const languageOb = configData.supportedLanguageMappings;
+            async.forEachSeries(targets, function (eachTarget, targetCallback) {
+                translateFunction.translate(recordList, eachTarget).then(([res]) => {
+                    const translatedData = {
+                        phoneNumber: res[0],
+                        farmerName: res[1],
+                        village: res[2],
+                        district: res[3],
+                        state: res[4],
+                        languageCode: eachTarget,
+                        language: languageOb[eachTarget],
+                        user: req.user._id
+                    }
+                    TranslateModel.create(translatedData)
+                    .then(trData => {
+                        targetCallback();
+                    })
+                    .catch(createErr => {
+                        return res.status(400).send({ error: createErr });
                     });
                 })
-                .catch(createError => {
-                    return res.status(400).send({ error: createError });
+                .catch(translateErr => {
+                    return res.status(400).send({ error: translateErr });
                 });
-            }
-            else {
-                return res.status(400).send({status: 'Data already translated'});
-            }
+            }, function(translateError) {
+                if(translateError) {
+                    return res.status(400).send({ error: translateError});
+                }
+                else {
+                    recordCallback();
+                }
+            });
         })
-        .catch(findErr => {
-            return res.status(400).send({ error: findErr });
+        .catch(createError => {
+            return res.status(400).send({ error: createError });
         });
     }, function(err) {
         if(err) {
@@ -97,6 +90,7 @@ exports.getTranslatedData = function(req, res) {
         {
             $group: { _id: "$language",  translatedData: { $push: "$$ROOT" } }
         },
+        { '$sort': { _id: 1 } },
         {
             $project: { translatedData: { phoneNumber: 1, farmerName: 1, village: 1, district: 1, state: 1 } }
         }

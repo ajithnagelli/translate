@@ -15,7 +15,9 @@ const schema = new Schema({
                 return re.test(v)
             },
             message: 'Please fill a valid email address'
-        }
+        },
+        
+        unique: true
 
     },
 
